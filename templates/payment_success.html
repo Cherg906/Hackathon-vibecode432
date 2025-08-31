@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Successful - AI Study Buddy</title>
+    <link rel="icon" type="image/jpeg" sizes="128x128" href="{{ url_for('static', filename='favicon.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div style="text-align: center; padding: 40px;">
+            <h1>🎉 Payment Successful!</h1>
+            <p>Thank you for upgrading to Premium!</p>
+            <p>Your subscription has been activated and you now have access to all premium features.</p>
+            
+            {% if tx_ref %}
+            <p><strong>Transaction Reference:</strong> {{ tx_ref }}</p>
+            {% endif %}
+            
+            <div style="margin: 30px 0;">
+                <h3>What's Next?</h3>
+                <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+                    <li>✓ Unlimited flashcard generation</li>
+                    <li>✓ Advanced AI features</li>
+                    <li>✓ Priority support</li>
+                    <li>✓ Export functionality</li>
+                </ul>
+            </div>
+            
+            <div class="navigation">
+                <a href="/" class="btn">Start Creating Flashcards</a>
+                <a href="/dashboard" class="btn">View Dashboard</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

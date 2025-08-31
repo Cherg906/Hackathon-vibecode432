@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Study Buddy</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='favicon.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <body style="background: url('{{ url_for('static', filename='background.jpg') }}') no-repeat center center fixed; background-size: cover; min-height: 100vh;">
+    <!-- Header with User Authentication -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <h1>AI Study Buddy</h1>
+            </div>
+            
+            <div class="user-section">
+                <!-- Guest User Interface -->
+                <div id="guest-interface" class="auth-interface">
+                    <button class="auth-btn login-btn" onclick="showLoginForm()">Login</button>
+                    <button class="auth-btn signup-btn" onclick="showSignupForm()">Sign Up</button>
+                </div>
+                
+                <!-- Logged In User Interface -->
+                <div id="user-interface" class="auth-interface" style="display: none;">
+                    <div class="user-info">
+                        <img id="user-avatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" 
+                             alt="User Avatar" class="user-avatar" onclick="openProfileModal()">
+                        <span id="user-name" style="margin-left:10px; font-weight:bold;"></span>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Authentication Forms -->
+    <div id="auth-overlay" class="auth-overlay" style="display: none;">
+        <div class="auth-modal">
+            <span class="close-btn" onclick="closeAuthForms()">&times;</span>
+            
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <h2>Login</h2>
+                <form onsubmit="handleLogin(event)">
+                    <input type="email" id="login-email" placeholder="Email" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit" class="auth-submit-btn">Login</button>
+                </form>
+                <p class="auth-switch">Don't have an account? <a href="#" onclick="switchToSignup()">Sign Up</a></p>
+            </div>
+            
+            <!-- Signup Form -->
+            <div id="signup-form" class="auth-form" style="display: none;">
+                <h2>Sign Up</h2>
+                <form onsubmit="handleSignup(event)">
+                    <input type="text" id="signup-name" placeholder="Full Name" required>
+                    <input type="email" id="signup-email" placeholder="Email" required>
+                    <input type="password" id="signup-password" placeholder="Password" required>
+                    <input type="password" id="signup-confirm-password" placeholder="Confirm Password" required>
+                    
+                    <!-- Profile Picture Upload (Optional) -->
+                    <div class="profile-picture-section">
+                        <label for="profile-picture" class="profile-picture-label">
+                            <div class="profile-picture-preview" id="profile-preview">
+                                <img id="profile-preview-img" src="https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" alt="Default AI Study Buddy">
+                                <div class="upload-overlay">
+                                    <span>📷</span>
+                                    <p>Click to upload (Optional)</p>
+                                </div>
+                            </div>
+                        </label>
+                        <input type="file" id="profile-picture" accept="image/*" onchange="previewProfilePicture(event)" style="display: none;">
+                        <p class="profile-picture-hint">Profile picture is optional. Default AI study buddy will be used if none uploaded.</p>
+                    </div>
+                    
+                    <button type="submit" class="auth-submit-btn">Sign Up</button>
+                </form>
+                <p class="auth-switch">Already have an account? <a href="#" onclick="switchToLogin()">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="hero-section" style="display: flex; flex-direction: row; align-items: center; justify-content: center; min-height: 340px;">
+            <div class="card-container" style="display: flex; flex-direction: row; background: #fff; box-shadow: 0 4px 24px rgba(0,0,0,0.10); border-radius: 24px; padding: 32px 24px; gap: 32px; align-items: center; max-width: 700px; width: 100%;">
+                <div class="input-section" style="flex: 1; display: flex; flex-direction: column; align-items: stretch; justify-content: center;">
+                    <h1 style="margin-bottom:10px; font-size:1.6rem; color:#2a2a2a;">Transform Your Study Notes</h1>
+                    <!-- AI Buddy Image between title and subtitle -->
+                    <div class="ai-image-container" style="width:100%; display: flex; justify-content: center; align-items: center; margin-bottom:10px;">
+                        <img src="{{ url_for('static', filename='ai buddy.jpg') }}" alt="AI Buddy" class="hero-image" style="width:auto; max-width:340px; height:auto; border-radius:20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+                    </div>
+                    <p style="margin-bottom:10px; color:#555;">Paste your study notes below and generate flashcards automatically with AI!</p>
+                    <textarea id="notes" placeholder="Paste your study notes here..." style="width:100%; min-width:220px; max-width:100%; height:120px; margin-bottom:14px; font-size:1rem; border-radius:10px; border:1px solid #d0d0d0; padding:10px; resize:vertical;"></textarea>
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button id="generate-btn" onclick="generateFlashcards()" style="padding:8px 22px; font-size:1rem; border-radius:8px; background:#3b82f6; color:#fff; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(59,130,246,0.08); transition:background 0.2s;">Generate Flashcards</button>
+                        <button id="clear-btn" type="button" style="padding:8px 22px; font-size:1rem; border-radius:8px; background:#e53e3e; color:#fff; border:none; cursor:pointer; box-shadow:0 2px 8px rgba(229,62,62,0.08); transition:background 0.2s;">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="result" class="result-section"></div>
+        <div class="navigation">
+            <a href="/dashboard" class="btn">View Dashboard</a>
+            <a href="/payment" class="btn">Upgrade Plan</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <p>&copy; 2025 AI Study Buddy. All rights reserved.</p>
+                <p>Developed by <strong>Chernet Getaneh</strong></p>
+            </div>
+            
+            <div class="footer-section">
+                                <h3>Need help?</h3>
+                                <a href="#" class="help-link" id="send-message-link">
+                                        <span>📧</span> Send your message
+                                </a>
+                                <!-- Contact Modal -->
+                                <div id="contact-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(0,0,0,0.35); z-index:9999; justify-content:center; align-items:center;">
+                                    <div style="background:#fff; border-radius:16px; padding:32px 24px; max-width:400px; width:90%; box-shadow:0 4px 24px rgba(0,0,0,0.12); position:relative;">
+                                        <span style="position:absolute; right:18px; top:12px; font-size:2.2rem; font-weight:bold; color:#e53e3e; background:#fff; border-radius:50%; box-shadow:0 2px 8px rgba(0,0,0,0.10); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; border:2px solid #e53e3e; z-index:10;" onclick="closeContactModal()">&times;</span>
+                                        <h2 style="margin-bottom:18px; font-size:1.5rem; color:#2563eb; text-align:center; font-weight:bold; letter-spacing:0.5px;">Contact Support</h2>
+                                        <form id="contact-form" onsubmit="sendContactMessage(event)">
+                                            <input type="text" id="contact-name" name="name" placeholder="Your Name" required style="width:100%; margin-bottom:10px; padding:8px; border-radius:8px; border:1px solid #ccc;">
+                                            <input type="email" id="contact-email" name="email" placeholder="Your Email" required style="width:100%; margin-bottom:10px; padding:8px; border-radius:8px; border:1px solid #ccc;">
+                                            <textarea id="contact-message" name="message" placeholder="Your Message" required style="width:100%; margin-bottom:10px; padding:8px; border-radius:8px; border:1px solid #ccc; min-height:80px;"></textarea>
+                                            <button type="submit" style="width:100%; padding:10px; border-radius:8px; background:#3b82f6; color:#fff; border:none; font-size:1rem; cursor:pointer;">Send Message</button>
+                                        </form>
+                                        <div id="contact-success" style="display:none; color:green; margin-top:10px;">Message sent successfully!</div>
+                                        <div id="contact-error" style="display:none; color:red; margin-top:10px;">Failed to send message. Please try again.</div>
+                                    </div>
+                                </div>
+                                <script>
+                                function openContactModal() {
+                                    document.getElementById('contact-modal').style.display = 'flex';
+                                }
+                                function closeContactModal() {
+                                    document.getElementById('contact-modal').style.display = 'none';
+                                    document.getElementById('contact-success').style.display = 'none';
+                                    document.getElementById('contact-error').style.display = 'none';
+                                }
+                                document.getElementById('send-message-link').onclick = function(e) {
+                                    e.preventDefault();
+                                    openContactModal();
+                                };
+                                function sendContactMessage(event) {
+                                    event.preventDefault();
+                                    var name = document.getElementById('contact-name').value;
+                                    var email = document.getElementById('contact-email').value;
+                                    var message = document.getElementById('contact-message').value;
+                                    fetch('/send_message', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ name, email, message })
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if(data.status === 'ok') {
+                                            document.getElementById('contact-success').style.display = 'block';
+                                            document.getElementById('contact-error').style.display = 'none';
+                                            document.getElementById('contact-form').reset();
+                                        } else {
+                                            document.getElementById('contact-success').style.display = 'none';
+                                            document.getElementById('contact-error').style.display = 'block';
+                                        }
+                                    })
+                                    .catch(() => {
+                                        document.getElementById('contact-success').style.display = 'none';
+                                        document.getElementById('contact-error').style.display = 'block';
+                                    });
+                                }
+                                </script>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Profile Update Modal -->
+    <div id="profile-modal" class="auth-overlay" style="display:none;">
+        <div class="auth-modal">
+            <span class="close-btn" onclick="closeProfileModal()">&times;</span>
+            <h2>Update Profile</h2>
+            <form id="profile-update-form" onsubmit="handleProfileUpdate(event)">
+                <label for="new-profile-picture">Change Profile Picture:</label>
+                <input type="file" id="new-profile-picture" accept="image/*" onchange="previewNewProfilePicture(event)">
+                <div class="profile-picture-preview" id="new-profile-preview">
+                    <img id="new-profile-preview-img" src="" alt="Profile Preview" style="max-width:100px; border-radius:50%;">
+                </div>
+                <label for="new-password">Change Password:</label>
+                <input type="password" id="new-password" placeholder="New Password">
+                <button type="submit" class="auth-submit-btn">Update Profile</button>
+            </form>
+            <button type="button" class="auth-submit-btn" style="background:#e53e3e; margin-top:10px;" onclick="removeAccount()">Remove Account</button>
+        </div>
+    </div>
+    <script>
+    function openProfileModal() {
+        document.getElementById('profile-modal').style.display = 'flex';
+    }
+    function closeProfileModal() {
+        document.getElementById('profile-modal').style.display = 'none';
+    }
+    document.getElementById('user-avatar').onclick = openProfileModal;
+    function previewNewProfilePicture(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('new-profile-preview-img').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    async function handleProfileUpdate(event) {
+        event.preventDefault();
+        const newPassword = document.getElementById('new-password').value;
+        const newProfileInput = document.getElementById('new-profile-picture');
+        let avatar = null;
+        if (newProfileInput.files && newProfileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                avatar = e.target.result;
+                await sendProfileUpdate(avatar, newPassword);
+            };
+            reader.readAsDataURL(newProfileInput.files[0]);
+        } else {
+            await sendProfileUpdate(null, newPassword);
+        }
+    }
+    async function sendProfileUpdate(avatar, newPassword) {
+        try {
+            const response = await fetch('/api/update_profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avatar, new_password: newPassword })
+            });
+            const data = await response.json();
+            if (data.status === 'ok') {
+                alert('Profile updated successfully!');
+                closeProfileModal();
+                if (avatar) {
+                    document.getElementById('user-avatar').src = avatar;
+                }
+            } else {
+                alert(data.message || 'Profile update failed');
+            }
+        } catch (err) {
+            alert('Profile update failed. Please try again.');
+        }
+    }
+    function removeAccount() {
+        if (confirm('Are you sure you want to remove your account? This action cannot be undone.')) {
+            fetch('/api/remove_account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    alert('Account removed successfully.');
+                    window.location.href = '/';
+                } else {
+                    alert('Failed to remove account. Please try again.');
+                }
+            })
+            .catch(error => {
+                alert('Error removing account. Please try again.');
+            });
+        }
+    }
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script src="{{ url_for('static', filename='auth.js') }}"></script>
+</body>
+</html>

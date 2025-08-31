@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Failed - AI Study Buddy</title>
+    <link rel="icon" type="image/jpeg" sizes="128x128" href="{{ url_for('static', filename='favicon.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div style="text-align: center; padding: 40px;">
+            <h1>❌ Payment Failed</h1>
+            <p>Sorry, your payment could not be processed.</p>
+            <p>This could be due to:</p>
+            <ul style="text-align: left; max-width: 400px; margin: 20px auto;">
+                <li>Insufficient funds</li>
+                <li>Card declined</li>
+                <li>Network issues</li>
+                <li>Invalid payment information</li>
+            </ul>
+            
+            <p>Please try again or contact support if the problem persists.</p>
+            
+            <div class="navigation">
+                <a href="/payment" class="btn">Try Again</a>
+                <a href="/" class="btn">Back to Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

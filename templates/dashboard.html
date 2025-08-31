@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Study Buddy - Dashboard</title>
+    <link rel="icon" type="image/jpeg" sizes="128x128" href="{{ url_for('static', filename='favicon.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>📚 Study Dashboard</h1>
+            <p>Your AI-generated flashcards organized by study sessions</p>
+        </div>
+        
+        {% if sessions %}
+            <!-- Statistics -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number">{{ pagination.total_flashcards }}</div>
+                    <div class="stat-label">Total Flashcards</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ pagination.total_sessions }}</div>
+                    <div class="stat-label">Study Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ pagination.sessions_with_timestamps }}</div>
+                    <div class="stat-label">With Timestamps</div>
+                </div>
+            </div>
+            
+            <!-- Page Info -->
+            <div class="page-info">
+                <p>Showing page {{ pagination.current_page }} of {{ pagination.total_pages }} 
+                   ({{ pagination.per_page }} sessions per page)</p>
+            </div>
+            
+            <!-- Display flashcards grouped by session -->
+            {% for session_timestamp, session_flashcards in sessions %}
+                <div class="flashcard-batch">
+                    <div class="batch-header">
+                        <div class="batch-info">
+                            <span class="batch-id">Session {{ (pagination.current_page - 1) * pagination.per_page + loop.index }}</span>
+                            <span class="batch-timestamp">
+                                {% if session_timestamp %}
+                                    📅 {{ session_timestamp.strftime('%B %d, %Y at %I:%M %p') }}
+                                {% else %}
+                                    📅 Unknown Time
+                                {% endif %}
+                            </span>
+                            <span class="batch-count">{{ session_flashcards|length }} cards</span>
+                        </div>
+                    </div>
+                    
+                    {% for flashcard in session_flashcards %}
+                        <div class="flashcard-item">
+                            <div class="flashcard-header">
+                                <span class="question-number">Question {{ loop.index }}</span>
+                                <span class="answer-number">Answer {{ loop.index }}</span>
+                            </div>
+                            <div class="question-text">{{ flashcard.question }}</div>
+                            <div class="answer-text">{{ flashcard.answer }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            
+            <!-- Pagination Controls -->
+            {% if pagination.total_pages > 1 %}
+                <div class="pagination-controls">
+                    <div class="pagination-info">
+                        <span>Page {{ pagination.current_page }} of {{ pagination.total_pages }}</span>
+                    </div>
+                    
+                    <div class="pagination-buttons">
+                        {% if pagination.has_prev %}
+                            <a href="{{ url_for('dashboard', page=pagination.prev_page, per_page=pagination.per_page) }}" 
+                               class="pagination-btn prev-btn">← Previous</a>
+                        {% endif %}
+                        
+                        <!-- Page Numbers -->
+                        <div class="page-numbers">
+                            {% set start_page = [1, pagination.current_page - 2] | max %}
+                            {% set end_page = [pagination.total_pages, pagination.current_page + 2] | min %}
+                            
+                            {% if start_page > 1 %}
+                                <a href="{{ url_for('dashboard', page=1, per_page=pagination.per_page) }}" 
+                                   class="page-number">1</a>
+                                {% if start_page > 2 %}
+                                    <span class="page-ellipsis">...</span>
+                                {% endif %}
+                            {% endif %}
+                            
+                            {% for page_num in range(start_page, end_page + 1) %}
+                                {% if page_num == pagination.current_page %}
+                                    <span class="page-number current">{{ page_num }}</span>
+                                {% else %}
+                                    <a href="{{ url_for('dashboard', page=page_num, per_page=pagination.per_page) }}" 
+                                       class="page-number">{{ page_num }}</a>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if end_page < pagination.total_pages %}
+                                {% if end_page < pagination.total_pages - 1 %}
+                                    <span class="page-ellipsis">...</span>
+                                {% endif %}
+                                <a href="{{ url_for('dashboard', page=pagination.total_pages, per_page=pagination.per_page) }}" 
+                                   class="page-number">{{ pagination.total_pages }}</a>
+                            {% endif %}
+                        </div>
+                        
+                        {% if pagination.has_next %}
+                            <a href="{{ url_for('dashboard', page=pagination.next_page, per_page=pagination.per_page) }}" 
+                               class="page-number next-btn">Next →</a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Per Page Selector -->
+                    <div class="per-page-selector">
+                        <label for="per-page">Sessions per page:</label>
+                        <select id="per-page" onchange="changePerPage(this.value)">
+                            <option value="5" {% if pagination.per_page == 5 %}selected{% endif %}>5</option>
+                            <option value="10" {% if pagination.per_page == 10 %}selected{% endif %}>10</option>
+                            <option value="20" {% if pagination.per_page == 20 %}selected{% endif %}>20</option>
+                            <option value="50" {% if pagination.per_page == 50 %}selected{% endif %}>50</option>
+                        </select>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="no-flashcards">
+                <h3>📝 No Flashcards Yet</h3>
+                <p>Start by generating some flashcards from your study notes!</p>
+            </div>
+        {% endif %}
+        
+        <div class="navigation">
+            <a href="/" class="btn">Back to Home</a>
+            <a href="/payment" class="btn">Upgrade Plan</a>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <p>&copy; 2025 AI Study Buddy. All rights reserved.</p>
+                <p>Developed by <strong>Chernet Getaneh</strong></p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Need help?</h3>
+                <a href="mailto:chernetg@gmail.com?subject=AI Study Buddy Support" class="help-link">
+                    <span>📧</span> Send your message
+                </a>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        function changePerPage(value) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('per_page', value);
+            urlParams.set('page', '1'); // Reset to first page when changing per_page
+            window.location.href = window.location.pathname + '?' + urlParams.toString();
+        }
+    </script>
+</body>
+</html>

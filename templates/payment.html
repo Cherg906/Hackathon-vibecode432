@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .pricing-cards {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            margin: 40px 0;
+        }
+        .pricing-card {
+            background: rgba(30, 41, 59, 0.85); /* dark overlay for readability */
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            padding: 32px 24px;
+            width: 320px;
+            max-width: 90vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #e1e5e9;
+            transition: box-shadow 0.2s;
+            color: #fff;
+        }
+        .pricing-card.featured {
+            border: 2px solid #3b82f6;
+            box-shadow: 0 8px 32px rgba(59,130,246,0.12);
+        }
+        .pricing-card h3 {
+            font-size: 1.4em;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+        .pricing-card.featured h3 {
+            color: #fff;
+        }
+        .pricing-card ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 18px;
+        }
+        .pricing-card ul li {
+            font-size: 1.1em;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .pricing-card button {
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-size: 1em;
+            border: none;
+            background: #64748b;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .pricing-card button:disabled {
+            background: #334155;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+        .pricing-card.featured button {
+            background: #2563eb;
+            color: #fff;
+        }
+        @media (max-width: 800px) {
+            .pricing-cards {
+                flex-direction: column;
+                gap: 24px;
+                align-items: center;
+            }
+            .pricing-card {
+                width: 95vw;
+            }
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>AI Study Buddy - Premium Upgrade</title>
+    <style>
+        .container h1 {
+            text-align: center;
+            color: #fff;
+        }
+        #paymentForm {
+            margin: 0 auto;
+            max-width: 400px;
+            color: #fff;
+        }
+        #paymentFormElement {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #paymentFormElement input,
+        #paymentFormElement select,
+        #paymentFormElement button {
+            width: 100%;
+            font-size: 1em;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            margin-bottom: 0;
+            background: rgba(30, 41, 59, 0.85);
+            color: #fff;
+        }
+        #paymentFormElement button {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        #paymentFormElement button:hover {
+            background: #2563eb;
+        }
+        @media (max-width: 600px) {
+            #paymentForm {
+                max-width: 95vw;
+            }
+        }
+    </style>
+    <link rel="icon" type="image/jpeg" sizes="128x128" href="{{ url_for('static', filename='favicon.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <body style="background: url('{{ url_for('static', filename='payment.jpg') }}') no-repeat center center fixed; background-size: cover; min-height: 100vh;">
+    <div class="container" style="position:relative; z-index:2;">
+    <h1>Upgrade to Premium</h1>
+    <p style="text-align:center; color:#fff;">Unlock advanced features and unlimited flashcard generation</p>
+        
+        <div class="pricing-cards">
+            <div class="pricing-card">
+                <h3>Basic - $0</h3>
+                <ul>
+                    <li>10 flashcards per day</li>
+                    <li>Basic features</li>
+                </ul>
+                <button disabled>Current Plan</button>
+            </div>
+            
+            <div class="pricing-card featured">
+                <h3>Premium - $9.99/month</h3>
+                <ul>
+                    <li>Unlimited flashcards</li>
+                    <li>Advanced AI features</li>
+                    <li>Priority support</li>
+                </ul>
+                <button onclick="selectPlan('premium', 9.99)">Upgrade Now</button>
+            </div>
+        </div>
+        
+        <div id="paymentForm" style="display: none;">
+            <h2 style="text-align:center;">Complete Payment</h2>
+            <form id="paymentFormElement">
+                <input type="text" id="firstName" placeholder="First Name" required>
+                <input type="text" id="lastName" placeholder="Last Name" required>
+                <input type="email" id="email" placeholder="Email" required>
+                <select id="currency">
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="ETB">ETB</option>
+                </select>
+                <button type="submit">Pay Now</button>
+            </form>
+            <div style="margin-top:18px; text-align:center; color:#fff; font-size:0.95em;">
+                <strong>Note:</strong> If you cancel payment on the Chapa page, please close the payment window manually.<br>
+                (Automatic closing is not supported by Chapa.)
+            </div>
+        </div>
+        
+        <a href="/" class="btn">Back to Home</a>
+    </div>
+
+    <script>
+        let selectedPlan = null;
+        let selectedAmount = 0;
+        
+        function selectPlan(plan, amount) {
+            selectedPlan = plan;
+            selectedAmount = amount;
+            document.getElementById('paymentForm').style.display = 'block';
+        }
+        
+        document.getElementById('paymentFormElement').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const response = await fetch('/create-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: selectedAmount,
+                    currency: document.getElementById('currency').value,
+                    email: document.getElementById('email').value,
+                    first_name: document.getElementById('firstName').value,
+                    last_name: document.getElementById('lastName').value
+                })
+            });
+            
+            const data = await response.json();
+            if (data.status === 'success') {
+                window.location.href = data.checkout_url;
+            } else {
+                alert('Payment failed: ' + data.message);
+            }
+        });
+    </script>
+</body>
+</html>

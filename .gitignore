@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+ENV/
+.env/
+
+# Environment variables
+.env
+
+# VS Code settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node modules (if any)
+node_modules/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Other
+*.sqlite3
+*.db
+
+# Supabase config (if any)
+supabase/.temp/
