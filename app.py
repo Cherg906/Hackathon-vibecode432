@@ -570,7 +570,7 @@ def generate():
     })
 
 if __name__ == "__main__":
-       import os
+    import os
 
     # Get the port assigned by Render, default to 5000 locally
     port = int(os.environ.get("PORT", 5000))
