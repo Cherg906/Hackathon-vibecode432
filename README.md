@@ -34,7 +34,7 @@ An intelligent flashcard generation application that converts your study notes i
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Cherg906/Hackathon-vibecode432.git
 cd ai_study_buddy_supabase
 ```
 
